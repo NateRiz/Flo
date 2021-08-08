@@ -77,14 +77,12 @@ class BoardImporter:
                         pairs[id_] = [Point(c, r, id_)]
                         board[r][c] = id_
 
-        [print(i) for i in board]
-        BoardImporter.debug_img.show()
+        if debug:
+            [print(i) for i in board]
+            BoardImporter.debug_img.show()
 
         BoardImporter._validate_board(board, pairs)
-        for points in pairs.values():
-            a, b = points
-            a.assign_pair(b)
-            b.assign_pair(a)
+        BoardImporter._create_pairs(pairs)
 
         return board, pairs
 
@@ -160,13 +158,18 @@ class BoardImporter:
                         if char not in pairs:
                             pairs[char] = []
                         pairs[char].append(point)
+
         BoardImporter._validate_board(board, pairs)
+        BoardImporter._create_pairs(pairs)
+
+        return board, pairs
+
+    @staticmethod
+    def _create_pairs(pairs):
         for points in pairs.values():
             a, b = points
             a.assign_pair(b)
             b.assign_pair(a)
-
-        return board, pairs
 
     @staticmethod
     def _validate_board(board, pairs):

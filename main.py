@@ -6,5 +6,6 @@ def main():
     board = Board("13x13.png")
     board.solve_board()
 
+
 if __name__ == '__main__':
     main()
