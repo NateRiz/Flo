@@ -1,27 +1,9 @@
-import os
-
-
-class Point:
-    def __init__(self, x, y, id_):
-        self.id = id_
-        self.coord = (y, x)
-        self.pair = None
-
-    def assign_pair(self, point):
-        self.pair = point
-
-    def __str__(self):
-        return self.id
-
-    def __repr__(self):
-        return str(self)
+from BoardImporter import BoardImporter
 
 
 class Board:
     def __init__(self, file_name):
-        self.board = []
-        self.pairs = {}
-        self.load_board_from_file(file_name)
+        self.board, self.pairs = BoardImporter.load_board_from_file(file_name)
         self.ids = set(self.pairs.keys())
 
     def solve_board(self):
@@ -40,35 +22,6 @@ class Board:
                     self.board[y][x] = self.board[coord[0]][coord[1]]
                     self.solve_pair((y, x))
                     self.board[y][x] = None
-
-
-    def load_board_from_file(self, file_name):
-        path = os.path.join(os.getcwd(), "Boards", file_name)
-        with open(path, "r") as file:
-            for y, line in enumerate(file):
-                line = [x.lower() for x in line.strip()]
-                self.board.append(list())
-                for x, char in enumerate(line):
-                    if char == "o":
-                        self.board[-1].append(None)
-                    else:
-                        point = Point(x, y, char)
-                        self.board[-1].append(point)
-                        if char not in self.pairs:
-                            self.pairs[char] = []
-                        self.pairs[char].append(point)
-        self.validate_board()
-        for points in self.pairs.values():
-            a, b = points
-            a.assign_pair(b)
-            b.assign_pair(a)
-
-    def validate_board(self):
-        length = len(self.board)
-        for i in self.board:
-            assert len(i) == length, f"Board must be a square. Found {length} x {len(i)}"
-        for key, points in self.pairs.items():
-            assert len(points) == 2, f"Board needs exactly two of each dot. Found {len(points)} with ID {key}"
 
     def __str__(self):
         res = ""
