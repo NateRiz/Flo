@@ -2,9 +2,11 @@ from Point import Point
 from PIL import Image
 import os
 from queue import Queue
+debug = 0
 
 
 class BoardImporter:
+    debug_img = None
 
     @staticmethod
     def load_board_from_file(file_name):
@@ -19,6 +21,8 @@ class BoardImporter:
     @staticmethod
     def _load_board_from_png(file_name):
         img = Image.open(file_name).convert("RGB")
+        if debug:
+            BoardImporter.debug_img = img.copy()
         width, height = img.size
         y = height // 2
         grid_pixel = -1
@@ -53,6 +57,8 @@ class BoardImporter:
                 y = (rows[r] + rows[r + 1]) // 2
                 avg_rgb = list(img.getpixel((x, y)))
                 for i, j in dirs:
+                    if debug:
+                        BoardImporter.debug_img.putpixel((x+i, y+j), (255, 255, 255))
                     rgb = img.getpixel((x+i, y+j))
                     for idx in range(len(rgb)):
                         avg_rgb[idx] += rgb[idx] // (len(dirs) + 1)
@@ -71,6 +77,9 @@ class BoardImporter:
                         pairs[id_] = [Point(c, r, id_)]
                         board[r][c] = id_
 
+        [print(i) for i in board]
+        BoardImporter.debug_img.show()
+
         BoardImporter._validate_board(board, pairs)
         for points in pairs.values():
             a, b = points
@@ -81,7 +90,6 @@ class BoardImporter:
 
     @staticmethod
     def _bfs_grid(img, y):
-        debug = img.copy()
         x = img.size[0]//2
         queue = Queue()
         queue.put((x, y))
@@ -92,6 +100,8 @@ class BoardImporter:
             x, y = queue.get()
             is_intersection = True
             original_rgb = img.getpixel((x, y))
+            if debug:
+                BoardImporter.debug_img.putpixel((x, y), (0, 255, 0))
             dirs = ((-1, 0), (0, -1), (1, 0), (0, 1))
             for i, j in dirs:
                 xi = x + i
@@ -101,8 +111,8 @@ class BoardImporter:
                     if rgb_almost_equals(original_rgb, rgb) and (xi, yj) not in seen:
                         seen.add((xi, yj))
                         queue.put((xi, yj))
-                xi = x + i * 3
-                yj = y + j * 3
+                xi = x + i * 10
+                yj = y + j * 10
                 if is_intersection:
                     if not (0 <= xi < img.size[0] and 0 <= yj < img.size[1]):
                         is_intersection = False
@@ -111,6 +121,8 @@ class BoardImporter:
                         if not rgb_almost_equals(original_rgb, rgb):
                             is_intersection = False
             if is_intersection:
+                if debug:
+                    BoardImporter.debug_img.putpixel((x, y), (255, 0, 0))
                 intersections.add((x, y))
 
         return BoardImporter._get_lines_far_apart(intersections)
@@ -120,7 +132,7 @@ class BoardImporter:
         def helper(_nums):
             start = 0
             res = []
-            for i in range(1, len(_nums) - 1):
+            for i in range(1, len(_nums)):
                 if _nums[i] != _nums[i - 1] + 1:
                     res.append((_nums[start] + _nums[i - 1]) // 2)
                     start = i
