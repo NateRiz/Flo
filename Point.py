@@ -18,11 +18,17 @@ class Point:
     def is_empty(self):
         return self.id is None
 
-    def take_space(self, point):
+    def try_take_space(self, point):
         assert self.id is None
-        self.source = point
+
+        for n in self.get_neighbors():
+            if n is not point and n.source == point.source:
+                return False
+
+        self.source = point.source
         self.pair = point.pair
         self.id = point.id
+        return True
 
     def clear_space(self):
         assert self.id is not None

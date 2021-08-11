@@ -12,6 +12,7 @@ class PictureImporter(ImportableType):
         self.debug_img = None
 
     def load(self, file_name):
+        print("Loading from image..\nDetecting grid..")
         img = Image.open(file_name).convert("RGB")
         if self.debug:
             self.debug_img = img.copy()
@@ -31,6 +32,7 @@ class PictureImporter(ImportableType):
         if grid_pixel == -1:
             raise RuntimeError("Couldn't find grid in image.")
 
+        print("Tracing rows and columns..")
         cols, rows = self._bfs_grid(img, y)
         sq_size = cols[1] - cols[0]
         cols.append(cols[-1] + sq_size)
@@ -41,6 +43,7 @@ class PictureImporter(ImportableType):
         self.board = [[None] * (len(cols) - 1) for _ in range(len(rows) - 1)]
         circles = {}
 
+        print("Locating and matching circle colors..")
         dirs = ((-1, 0), (0, -1), (1, 0), (0, 1))
         for c in range(len(cols) - 1):
             for r in range(len(rows) - 1):
