@@ -5,7 +5,7 @@ class BoardSolver:
     def __init__(self, board):
         self.start = time()
         self.board = board
-        self.ids = sorted(list(board.pairs.keys()), key=lambda p: board.pairs[p][0].distance, reverse=True)
+        self.ids = list(board.pairs.keys())
 
     def solve(self):
         if not self.ids:
@@ -20,14 +20,22 @@ class BoardSolver:
         self.ids.append(char)
 
     def _solve_pair(self, point):
-        #print(self.board)
+        print(point)
+        print(self.board)
 
-        for n in point.get_neighbors():
+        for n in point.get_available_moves():  # type: Point
             if point.is_matching_pair(n):
+                self.set_all_colors_connected(point.id, True)
                 self.solve()
+                self.set_all_colors_connected(point.id, False)
                 return
-            elif n.is_empty():
-                valid = n.try_take_space(point)
-                if valid:
-                    self._solve_pair(n)
-                    n.clear_space()
+            n.take_space(point)
+            self._solve_pair(n)
+            n.clear_space()
+
+    def set_all_colors_connected(self, id_, is_connected):
+        return
+        for row in self.board:
+            for point in row:
+                if point.id == id_:
+                    point.is_connected = is_connected
